@@ -8,7 +8,7 @@ suffix=${suffix:0:18}
 # Set the necessary variables
 RESOURCE_GROUP="rg-genai-l${suffix}"
 RESOURCE_PROVIDER="Microsoft.MachineLearning"
-REGIONS=("eastus" "westus" "centralus" "northeurope" "westeurope")
+REGIONS=("eastus")
 RANDOM_REGION=${REGIONS[$RANDOM % ${#REGIONS[@]}]}
 WORKSPACE_NAME="mlw-genai-l${suffix}"
 COMPUTE_INSTANCE="ci${suffix}"
