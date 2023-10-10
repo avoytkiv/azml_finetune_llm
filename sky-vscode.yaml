@@ -1,0 +1,18 @@
+# To launch a cloud instance for interactive development, run: sky launch -c vscode -i 60 sky-vscode.yaml
+name: sky-vscode
+resources:
+  accelerators: A10G:1
+  cloud: aws
+  use_spot: true
+workdir: .
+file_mounts:
+  ~/.ssh/id_rsa: ~/.ssh/id_rsa
+  ~/.ssh/id_rsa.pub: ~/.ssh/id_rsa.pub
+  ~/.gitconfig: ~/.gitconfig
+setup: |
+  ...
+  pip install -r requirements.txt
+  sudo snap install --classic code
+  ...
+run: |
+  code tunnel --accept-server-license-terms
