@@ -9,7 +9,8 @@
 	},
 	"features": {
 		"azure-cli": "latest",
-		"ghcr.io/devcontainers/features/git:1": {}
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/iterative/features/dvc:1": {"version": "3.0.0"}
 	},
 	"customizations": {
 		"vscode": {
@@ -24,7 +25,9 @@
 				"ms-toolsai.vscode-ai-remote",
 				"ms-python.flake8",
 				"ms-python.pylint",
-				"github.vscode-github-actions"
+				"github.vscode-github-actions",
+				"iterative.dvc",
+				"amazonwebservices.aws-toolkit-vscode"
 			]
 		}
 	},
