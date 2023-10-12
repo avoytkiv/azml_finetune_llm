@@ -15,7 +15,7 @@ preprocess:
 
 train:
   num_labels: 5 
-  output_dir: results
+  output_dir: models
   evaluation_strategy: "epoch"
   save_strategy: "epoch"
   logging_dir: './logs'
@@ -27,7 +27,7 @@ train:
   push_to_hub: False
 
 evaluate:
-  model_path: models
+  metrics_path: results/metrics.json
   batch_size: 32
   shuffle: False
   num_workers: 2
