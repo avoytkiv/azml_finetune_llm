@@ -1,10 +1,7 @@
 import dvc.api
 from datasets import Dataset, DatasetDict
 import pandas as pd
-from sklearn.model_selection import train_test_split
-import torch
 import transformers
-from transformers import AutoTokenizer
 from pathlib import Path
 import sys
 from logs import get_logger
@@ -31,9 +28,15 @@ def from_pd_to_hf(dataset: pd.DataFrame) -> Dataset:
 
 
 def split_dataset(dataset: Dataset, test_train_split: float, random_state: int) -> DatasetDict:
-    train, test = train_test_split(dataset, test_size=test_train_split, random_state=random_state)
-    test, val = train_test_split(test, test_size=0.5, random_state=random_state)
-    return DatasetDict({"train": train, "validation": val, "test": test})
+    dataset = dataset.train_test_split(test_size=test_train_split, shuffle=True, seed=random_state)
+    return dataset
+
+
+def get_model_tokenizer(model_name):
+    tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
+    model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name)
+    return tokenizer, model
+
 
 def preprocess_batch(batch, tokenizer, max_length):
     """Process a batch of examples."""
@@ -71,18 +74,15 @@ def preprocess() -> DatasetDict:
     logger.info("Split the dataset")
     dataset = split_dataset(dataset, test_train_split=test_train_split, random_state=random_state)
 
-    logger.info(f"Load tokenizer with model {model_name}")
-    tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
-    # model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name)
+    logger.info(f"Load tokenizer with {model_name} model")
+    tokenizer, model = get_model_tokenizer(model_name)
 
     logger.info("Preprocess the dataset")
     preprocessed_dataset = {}
     for split in dataset:
         logger.info(f"Preprocessing {split} split")
         preprocessed_dataset[split] = dataset[split].map(lambda x: preprocess_batch(x, tokenizer, max_length), batched=True)
-    
-    logger.info(preprocessed_dataset['train'][0]['input_ids'])
-    logger.info(preprocessed_dataset['validation'][0]['input_ids'])
+
     return preprocessed_dataset
 
 

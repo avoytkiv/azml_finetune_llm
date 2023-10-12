@@ -1,10 +1,13 @@
+import os
 import pandas as pd
 import torch
 import transformers
-from datasets import load_dataset
 from logs import preprocess_function
 import dvc.api
+from dvclive.huggingface import DVCLiveCallback
 from logs import get_logger
+from utils import CheckpointCallback, cleanup_incomplete_checkpoints
+
 
 def train():
 
@@ -46,11 +49,19 @@ def train():
         tokenizer=tokenizer
     )
 
-    trainer.train()
+    cleanup_incomplete_checkpoints(training_args.output_dir)
+    trainer.add_callback(CheckpointCallback())
+    trainer.add_callback(DVCLiveCallback(log_model="all"))
 
-    # Save the model
-    model.save_pretrained("./saved_model")
-    tokenizer.save_pretrained("./saved_model")
+    if not os.listdir(training_args.output_dir):
+        trainer.train()
+    else:
+        print("Resuming from checkpoint...")
+        trainer.train(resume_from_checkpoint=True)
+
+    logger.info("Saving model")
+    trainer.model.save_pretrained(model_adapter_out_path)
+
 
 if __name__ == "__main__":
     train()
