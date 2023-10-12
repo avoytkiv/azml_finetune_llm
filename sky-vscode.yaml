@@ -3,16 +3,25 @@ name: sky-vscode
 resources:
   accelerators: A10G:1
   cloud: aws
-  use_spot: true
-workdir: .
+  region: us-west-1
+  instance_type: g4dn.xlarge
+  cpus: 8
+  image_id: ami-0d85eb7b91911c834 # Deep Learning AMI GPU PyTorch 2.0.1
+  # use_spot: true
+workdir: . # the working directory containing project code that will be synced to the provisioned instance(s)
 file_mounts:
+# section is where you can specify files that you want to be available on the instance. 
+# In this case, I’m mounting my SSH keys and my git config so that I can interact with my git repositories from the instance. 
+# This is required here because of the by-design tight integration between DVC and git.
   ~/.ssh/id_rsa: ~/.ssh/id_rsa
   ~/.ssh/id_rsa.pub: ~/.ssh/id_rsa.pub
   ~/.gitconfig: ~/.gitconfig
-setup: |
-  ...
+setup: | # only executed on `sky launch`
+  pip install --upgrade pip
   pip install -r requirements.txt
-  sudo snap install --classic code
-  ...
+# optional nvtop installation if you want to monitor GPU usage
+  sudo add-apt-repository ppa:flexiondotorg/nvtop -y && sudo apt install nvtop
 run: |
-  code tunnel --accept-server-license-terms
+  dvc pull 
+  dvc exp run --pull
+  dvc exp push origin
