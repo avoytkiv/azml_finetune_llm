@@ -1,0 +1,16 @@
+stages:
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+      - src/evaluate.py
+      - src/preprocess.py
+    params:
+      - evaluate.batch_size
+      - evaluate.shuffle
+      - evaluate.num_workers
+      - preprocess.model_name
+      - preprocess.max_length
+      - base.log_level
+      - base.random_state
+    outs:
+      - ${evaluate.metrics_path}
