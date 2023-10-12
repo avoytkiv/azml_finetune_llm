@@ -82,6 +82,9 @@ You can change the cloud provider and instance type in the resources section of 
 3. Use DVC to track metrics, model, and parameters across the train and evaluate stages.
 
 ## Useful Resources
--[ML experiments in the cloud with SkyPilot and DVC](https://alex000kim.com/tech/2023-08-10-ml-experiments-in-cloud-skypilot-dvc/)
--[Fine-Tuning Large Language Models with a Production-Grade Pipeline](https://iterative.ai/blog/finetune-llm-pipeline-dvc-skypilot)
+- [SkyPilot Documentation](https://skypilot-dev.readthedocs.io/en/latest/)
+- [DVC Documentation](https://dvc.org/doc)
+- [ML experiments in the cloud with SkyPilot and DVC](https://alex000kim.com/tech/2023-08-10-ml-experiments-in-cloud-skypilot-dvc/)
+- [Fine-Tuning Large Language Models with a Production-Grade Pipeline](https://iterative.ai/blog/finetune-llm-pipeline-dvc-skypilot)
+- [Skypilot LLM](https://github.com/skypilot-org/skypilot/tree/master/llm)
 
