@@ -2,28 +2,35 @@ stages:
   evaluate:
     cmd: python src/evaluate.py
     deps:
-      - src/evaluate.py
-      - src/preprocess.py
+    - src/evaluate.py
+    - src/preprocess.py
     params:
-      - evaluate.batch_size
-      - evaluate.shuffle
-      - evaluate.num_workers
-      - preprocess.model_name
-      - preprocess.max_length
-      - base.log_level
-      - base.random_state
+    - evaluate.batch_size
+    - evaluate.shuffle
+    - evaluate.num_workers
+    - preprocess.model_name
+    - preprocess.max_length
+    - base.log_level
+    - base.random_state
     metrics:
     - results/metrics.json:
         cache: false
     frozen: true
-  
+
   fine-tune:
     cmd: python src/train.py
     deps:
-      - src/train.py
-      - src/preprocess.py
-      - src/utils.py
+    - src/train.py
+    - src/preprocess.py
+    - src/utils.py
     params:
-      - train
+    - train
     outs:
-      - models/finetuned_model
+    - models/finetuned_model
+params:
+- dvclive/params.yaml
+metrics:
+- dvclive/metrics.json
+plots:
+- dvclive/plots/metrics:
+    x: step

@@ -29,7 +29,7 @@ log_on_each_node: true
 logging_dir: ./logs
 logging_strategy: steps
 logging_first_step: false
-logging_steps: 100
+logging_steps: 1000
 logging_nan_inf_filter: true
 save_strategy: epoch
 save_steps: 500
@@ -44,7 +44,7 @@ data_seed:
 jit_mode_eval: false
 use_ipex: false
 bf16: false
-fp16: false
+fp16: true
 fp16_opt_level: O1
 half_precision_backend: auto
 bf16_full_eval: false

@@ -25,3 +25,71 @@ stages:
       hash: md5
       md5: cab9ea621306b70dcf9c0fbcd2155d25
       size: 19
+  fine-tune:
+    cmd: python src/train.py
+    deps:
+    - path: src/preprocess.py
+      hash: md5
+      md5: 645f6ddbb5fd496476ddc76a069ba937
+      size: 3317
+    - path: src/train.py
+      hash: md5
+      md5: c43f96866550a306643b448367c6792c
+      size: 2531
+    - path: src/utils.py
+      hash: md5
+      md5: ebd8b55c7e9f39c2d8b1d1f1ba90beb2
+      size: 1138
+    params:
+      params.yaml:
+        train:
+          finetuned_model_out_path: models/finetuned_model
+          trainer_args:
+            output_dir: dvclive/artifacts
+            overwrite_output_dir: false
+            do_train: true
+            do_eval: true
+            do_predict: false
+            evaluation_strategy: epoch
+            prediction_loss_only: false
+            per_device_train_batch_size: 8
+            per_device_eval_batch_size: 8
+            gradient_accumulation_steps: 1
+            learning_rate: 5e-05
+            weight_decay: 0.01
+            adam_beta1: 0.9
+            adam_beta2: 0.999
+            adam_epsilon: 1e-08
+            max_grad_norm: 1.0
+            num_train_epochs: 3
+            lr_scheduler_type: linear
+            warmup_ratio: 0.1
+            log_level: info
+            log_level_replica: warning
+            logging_dir: ./logs
+            logging_strategy: steps
+            logging_steps: 1000
+            save_strategy: epoch
+            save_total_limit: 2
+            use_cpu: false
+            seed: 42
+            label_names:
+            - labels
+            load_best_model_at_end: true
+            metric_for_best_model: accuracy
+            greater_is_better: true
+            remove_unused_columns: true
+            fp16: true
+            fp16_opt_level: O1
+            group_by_length: true
+            length_column_name: length
+            report_to: none
+            ddp_find_unused_parameters: false
+            dataloader_pin_memory: true
+            skip_memory_metrics: true
+    outs:
+    - path: models/finetuned_model
+      hash: md5
+      md5: 27142c514c08dc934afaba27a5c0f8d0.dir
+      size: 438014123
+      nfiles: 2
