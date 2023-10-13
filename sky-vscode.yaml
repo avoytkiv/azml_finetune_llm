@@ -19,4 +19,5 @@ run: |
   source activate pytorch
   dvc pull 
   dvc exp run --pull --allow-missing
+  chmod 600 ~/.ssh/config
   dvc exp push origin
