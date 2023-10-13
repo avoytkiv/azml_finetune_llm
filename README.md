@@ -73,10 +73,16 @@ More details can be found [here](https://serverfault.com/questions/253313/ssh-re
 
 Submit a run job to the cloud and pull the results to your local machine.
 
-To launch a cloud instance for interactive development, run:
+To launch a cloud instance and submit job, run:
 
 ```shell
 sky launch -c vscode -i 60 sky-vscode.yaml
+```
+
+To launch on spot instances, run:
+
+```shell
+sky launch sky-vscode.yaml  -c vscode -d --use-spot
 ```
 
 To launch explicitly on AWS, run:
@@ -94,6 +100,8 @@ sky launch -c train --use-spot -i 30 --down sky-training.yaml
 ```
 
 This SkyPilot command uses spot instances to save costs and automatically terminates the instance after 30 minutes of idleness. Once the experiment is complete, its artifacts such as model weights and metrics are stored in your bucket (thanks to the dvc exp push origin command in sky-training.yaml).
+
+Add `--env DVC-STUDIO-TOKEN` to see the experiment running live in DVC Studio.
 
 While the model is training you can monitor the logs by running the following command.
 
