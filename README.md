@@ -1,5 +1,20 @@
 # Fine-Tuning LLM with SkyPilot and DVC
 
+**Tasks**
+- [x] Preprocess the custom `hotels-reviews` dataset.
+    - [x] Convert the dataset to the HuggingFace format.
+    - [x] Split the dataset into train and test sets.
+    - [x] Tokenize the dataset.
+- [x] Evaluate the `bert-base-uncased` model on the preprocessed dataset.
+- [x] Fine-tune the `bert-base-uncased` model.
+- [x] Set up SkyPilot and DVC.
+    - [x] Install SkyPilot and DVC.
+    - [x] Configure AWS cloud.
+    - [x] Upload the data to S3 (tracked by DVC).
+    - [x] Create a SkyPilot configuration to run the training pipeline in the cloud.
+    - [x] Create SSH keys to connect to GitHub (DVC needs it to push the results of the experiment to the remote storage).
+
+
 ## Setup
 
 install SkyPilot and DVC using pip
@@ -81,10 +96,20 @@ You can change the cloud provider and instance type in the resources section of 
 2. Evaluate the model on the `hotels-reviews-small` dataset.
 3. Use DVC to track metrics, model, and parameters across the train and evaluate stages.
 
+## Usefull Commands
+
+Freeze only the packages that are required to run the project.
+
+```shell
+pip freeze -q -r requirements.txt | sed '/freeze/,$ d' > requirements-froze.txt
+mv requirements-froze.txt requirements.txt
+```
+
 ## Useful Resources
 - [SkyPilot Documentation](https://skypilot-dev.readthedocs.io/en/latest/)
 - [DVC Documentation](https://dvc.org/doc)
 - [ML experiments in the cloud with SkyPilot and DVC](https://alex000kim.com/tech/2023-08-10-ml-experiments-in-cloud-skypilot-dvc/)
 - [Fine-Tuning Large Language Models with a Production-Grade Pipeline](https://iterative.ai/blog/finetune-llm-pipeline-dvc-skypilot)
 - [Skypilot LLM](https://github.com/skypilot-org/skypilot/tree/master/llm)
+- [Create SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 
