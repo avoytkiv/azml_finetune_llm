@@ -57,7 +57,7 @@ git remote set-url origin git@github.com:avoytkiv/azml_finetune_llm.git
 
 Also, check permissions for the SSH key and change them if needed. This error may occur if the permissions are not correct:
 
->[!ERROR]
+>[!ERROR]   
 >The remote server unexpectedly closed the connection.owner or permissions on /home/ubuntu/.ssh/config
 
 This can be fixed by changing the permissions of the config file:
