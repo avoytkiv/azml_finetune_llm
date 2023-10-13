@@ -1,0 +1,27 @@
+schema: '2.0'
+stages:
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: src/evaluate.py
+      hash: md5
+      md5: 1b6fb977e4f44828eb94eb6e08f49e68
+      size: 1999
+    - path: src/preprocess.py
+      hash: md5
+      md5: 805f167c27aeed482f5e2d53fa7171f6
+      size: 3128
+    params:
+      params.yaml:
+        base.log_level: INFO
+        base.random_state: 42
+        evaluate.batch_size: 32
+        evaluate.num_workers: 2
+        evaluate.shuffle: false
+        preprocess.max_length: 128
+        preprocess.model_name: bert-base-uncased
+    outs:
+    - path: results/metrics.json
+      hash: md5
+      md5: 36c5885f5a4895b6b625d81a73d6e992
+      size: 17
