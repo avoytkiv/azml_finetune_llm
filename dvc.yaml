@@ -12,5 +12,6 @@ stages:
       - preprocess.max_length
       - base.log_level
       - base.random_state
-    outs:
-      - ${evaluate.metrics_path}
+    metrics:
+    - results/metrics.json:
+        cache: false
