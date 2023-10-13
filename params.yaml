@@ -7,6 +7,7 @@ data:
   data_train_path: data/train.csv
   data_val_path: data/val.csv
   data_test_path: data/test.csv
+  num_labels: 5
 
 preprocess:
   test_train_split: 0.2
@@ -14,17 +15,50 @@ preprocess:
   max_length: 128
 
 train:
-  num_labels: 5 
-  output_dir: models
-  evaluation_strategy: "epoch"
-  save_strategy: "epoch"
-  logging_dir: './logs'
-  logging_steps: 10
-  per_device_train_batch_size: 16
-  per_device_eval_batch_size: 16
-  num_train_epochs: 3
-  save_total_limit: 2
-  push_to_hub: False
+  finetuned_model_out_path: models/finetuned_model
+  trainer_args:
+    output_dir: dvclive/artifacts
+    overwrite_output_dir: False
+    do_train: True
+    do_eval: True
+    do_predict: False
+    evaluation_strategy: "epoch"
+    prediction_loss_only: False
+    per_device_train_batch_size: 8
+    per_device_eval_batch_size: 8
+    gradient_accumulation_steps: 1
+    learning_rate: 5e-5
+    weight_decay: 0.01
+    adam_beta1: 0.9
+    adam_beta2: 0.999
+    adam_epsilon: 1e-8
+    max_grad_norm: 1.0
+    num_train_epochs: 3
+    lr_scheduler_type: "linear"
+    warmup_ratio: 0.1
+    log_level: "info"
+    log_level_replica: "warning"
+    logging_dir: "./logs"
+    logging_strategy: "steps"
+    logging_steps: 100
+    save_strategy: "epoch"
+    save_total_limit: 2
+    use_cpu: False
+    seed: 42
+    label_names: ["labels"]
+    load_best_model_at_end: True
+    metric_for_best_model: "accuracy"
+    greater_is_better: True
+    remove_unused_columns: True
+    fp16: True
+    fp16_opt_level: "O1"
+    group_by_length: True
+    length_column_name: "length"
+    report_to: "none"
+    ddp_find_unused_parameters: False
+    dataloader_pin_memory: True
+    skip_memory_metrics: True
+
 
 evaluate:
   metrics_path: results/metrics.json
