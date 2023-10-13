@@ -13,17 +13,18 @@ from tqdm import tqdm
 src_path = Path(__file__).parent.parent.resolve()
 sys.path.append(str(src_path))
 
+
 def evaluate():
     config = dvc.api.params_show()
-    
+
     log_level = config["base"]["log_level"]
-    random_state = config["base"]["seed"]
+    random_state = config["base"]["random_state"]
     model_name = config["preprocess"]["model_name"]
     batch_size = config["evaluate"]["batch_size"]
     shuffle = config["evaluate"]["shuffle"]
     num_workers = config["evaluate"]["num_workers"]
     metrics_path = Path(src_path, config["evaluate"]["metrics_path"])
-    num_labels = config["train"]["num_labels"]
+    num_labels = config["data"]["num_labels"]
 
     logger = get_logger("EVALUATE", log_level=log_level)
 
