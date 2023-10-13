@@ -5,20 +5,31 @@ import transformers
 from pathlib import Path
 import sys
 from logs import get_logger
+import random
+import torch
+import numpy as np
 
 
 src_path = Path(__file__).parent.parent.resolve()
 sys.path.append(str(src_path))
 
 
+def fix_random_seeds(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+
 def read_data(path) -> pd.DataFrame:
     return pd.read_csv(path)
+
 
 def labels_to_int(dataset) -> pd.DataFrame:
     labels = dataset["Label"].unique()
     label2id = {label: i for i, label in enumerate(labels)}
     dataset["Label"] = dataset["Label"].map(label2id)
     return dataset
+
 
 def from_pd_to_hf(dataset: pd.DataFrame) -> Dataset:
     dataset = Dataset.from_pandas(dataset)
@@ -50,6 +61,7 @@ def preprocess_batch(batch, tokenizer, max_length):
     result['labels'] = batch['label']
     return result
 
+
 def preprocess() -> DatasetDict:
     """Preprocess the datasets."""
     config = dvc.api.params_show()
@@ -62,6 +74,8 @@ def preprocess() -> DatasetDict:
     max_length = config["preprocess"]["max_length"]
     model_name = config["preprocess"]["model_name"]
     num_labels = config["train"]["num_labels"]
+
+    fix_random_seeds(random_state)
 
     logger.info("Read data")
     dataset = read_data(data_path)

@@ -1,6 +1,6 @@
 import torch
 import transformers
-from preprocess import preprocess, get_model_tokenizer
+from preprocess import preprocess, get_model_tokenizer, fix_random_seeds
 import dvc.api
 from sklearn.metrics import accuracy_score
 from logs import get_logger
@@ -15,14 +15,19 @@ sys.path.append(str(src_path))
 
 def evaluate():
     config = dvc.api.params_show()
-    logger = get_logger("EVALUATE", log_level=config["base"]["log_level"])
     
+    log_level = config["base"]["log_level"]
+    random_state = config["base"]["seed"]
     model_name = config["preprocess"]["model_name"]
     batch_size = config["evaluate"]["batch_size"]
     shuffle = config["evaluate"]["shuffle"]
     num_workers = config["evaluate"]["num_workers"]
     metrics_path = Path(src_path, config["evaluate"]["metrics_path"])
     num_labels = config["train"]["num_labels"]
+
+    logger = get_logger("EVALUATE", log_level=log_level)
+
+    fix_random_seeds(random_state)
 
     logger.info(f"Loading model {model_name}...")
     tokenizer, model = get_model_tokenizer(model_name, num_labels)
