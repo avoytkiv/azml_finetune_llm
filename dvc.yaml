@@ -15,3 +15,15 @@ stages:
     metrics:
     - results/metrics.json:
         cache: false
+    frozen: true
+  
+  fine-tune:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - src/preprocess.py
+      - src/utils.py
+    params:
+      - train
+    outs:
+      - models/finetuned_model
