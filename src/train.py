@@ -2,51 +2,58 @@ import os
 import pandas as pd
 import torch
 import transformers
-from logs import preprocess_function
+from logs import get_logger
+from preprocess import preprocess, get_model_tokenizer, fix_random_seeds
 import dvc.api
 from dvclive.huggingface import DVCLiveCallback
 from logs import get_logger
 from utils import CheckpointCallback, cleanup_incomplete_checkpoints
+from sklearn.metrics import accuracy_score
+
+
+def compute_metrics(p):
+    preds = np.argmax(p.predictions, axis=1)
+    return {"accuracy": accuracy_score(p.label_ids, preds)}
 
 
 def train():
 
     config = dvc.api.params_show()
 
-    logger = get_logger("TRAIN", log_level=config["base"]["log_level"])
+    log_level = config["base"]["log_level"]
+    random_state = config["base"]["random_state"]
+    model_name = config["preprocess"]["model_name"]
+    num_labels = config["data"]["num_labels"]
+    trainer_args = config["train"]["trainer_args"]
+    finetuned_model_out_path = config["train"]["finetuned_model_out_path"]
 
-    model_name = config["data"]["model_name"]
-    num_labels = config["train"]["num_labels"]
-    data_train_path = config["data"]["data_train"]
+    if torch.cuda.is_available():
+        trainer_args['fp16'] = True
+    else:
+        trainer_args['fp16'] = False
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
-    model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
+    logger = get_logger("TRAIN", log_level=log_level)
 
-    # Load the dataset
-    dataset = pd.read_csv(data_train_path)
+    fix_random_seeds(random_state)
 
-    preprocessed_dataset = dataset.map(lambda x: preprocess_function(x, tokenizer), batched=True)
+    logger.info(f"Loading model {model_name}...")
+    tokenizer, model = get_model_tokenizer(model_name, num_labels)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.to(device)
 
-    # Training configuration
-    training_args = transformers.TrainingArguments(
-        output_dir='./results',
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
-        logging_dir='./logs',
-        logging_steps=10,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=16,
-        num_train_epochs=3,
-        save_total_limit=2,
-        push_to_hub=False,
-    )
+    logger.info("Loading dataset...")
+    preprocessed_dataset = preprocess()
+
+    logger.info("Training model...")
+    training_args = transformers.TrainingArguments(**trainer_args)
 
     trainer = transformers.Trainer(
         model=model,
         args=training_args,
         train_dataset=preprocessed_dataset["train"],
-        eval_dataset=preprocessed_dataset["validation"],
-        tokenizer=tokenizer
+        eval_dataset=preprocessed_dataset["test"],
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics
     )
 
     cleanup_incomplete_checkpoints(training_args.output_dir)
@@ -56,11 +63,11 @@ def train():
     if not os.listdir(training_args.output_dir):
         trainer.train()
     else:
-        print("Resuming from checkpoint...")
+        logger.info("Resuming training from checkpoint")
         trainer.train(resume_from_checkpoint=True)
 
     logger.info("Saving model")
-    trainer.model.save_pretrained(model_adapter_out_path)
+    trainer.model.save_pretrained(finetuned_model_out_path)
 
 
 if __name__ == "__main__":

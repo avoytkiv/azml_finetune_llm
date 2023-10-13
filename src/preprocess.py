@@ -73,7 +73,7 @@ def preprocess() -> DatasetDict:
     data_path = Path(src_path, config["data"]["data_path"])
     max_length = config["preprocess"]["max_length"]
     model_name = config["preprocess"]["model_name"]
-    num_labels = config["train"]["num_labels"]
+    num_labels = config["data"]["num_labels"]
 
     fix_random_seeds(random_state)
 
