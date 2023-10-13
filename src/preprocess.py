@@ -32,9 +32,9 @@ def split_dataset(dataset: Dataset, test_train_split: float, random_state: int) 
     return dataset
 
 
-def get_model_tokenizer(model_name):
+def get_model_tokenizer(model_name, num_labels):
     tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
-    model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name)
+    model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
     return tokenizer, model
 
 
@@ -61,6 +61,7 @@ def preprocess() -> DatasetDict:
     data_path = Path(src_path, config["data"]["data_path"])
     max_length = config["preprocess"]["max_length"]
     model_name = config["preprocess"]["model_name"]
+    num_labels = config["train"]["num_labels"]
 
     logger.info("Read data")
     dataset = read_data(data_path)
@@ -74,8 +75,13 @@ def preprocess() -> DatasetDict:
     logger.info("Split the dataset")
     dataset = split_dataset(dataset, test_train_split=test_train_split, random_state=random_state)
 
+    logger.info("Assert that the number of labels is correct")
+    assert len(set(dataset["train"]["label"])) == num_labels
+    assert len(set(dataset["test"]["label"])) == num_labels
+
+
     logger.info(f"Load tokenizer with {model_name} model")
-    tokenizer, model = get_model_tokenizer(model_name)
+    tokenizer, model = get_model_tokenizer(model_name, num_labels)
 
     logger.info("Preprocess the dataset")
     preprocessed_dataset = {}

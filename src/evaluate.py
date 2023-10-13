@@ -7,6 +7,7 @@ from logs import get_logger
 from pathlib import Path
 import sys
 import json
+from tqdm import tqdm
 
 
 src_path = Path(__file__).parent.parent.resolve()
@@ -21,10 +22,12 @@ def evaluate():
     shuffle = config["evaluate"]["shuffle"]
     num_workers = config["evaluate"]["num_workers"]
     metrics_path = Path(src_path, config["evaluate"]["metrics_path"])
+    num_labels = config["train"]["num_labels"]
 
     logger.info(f"Loading model {model_name}...")
-    tokenizer, model = get_model_tokenizer(model_name)
-    model.to('cuda')
+    tokenizer, model = get_model_tokenizer(model_name, num_labels)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.to(device)
 
     logger.info("Loading dataset...")
     preprocessed_dataset = preprocess()
@@ -41,19 +44,22 @@ def evaluate():
     all_labels = []
 
     logger.info("Evaluating...")
+    max_batches = 10
     with torch.no_grad():
-        for batch in val_loader:
-            batch = {k: v.to('cuda') for k, v in batch.items()}
+        for i, batch in enumerate(tqdm(val_loader, desc="Evaluating", unit="batch")):
+            batch = {k: v.to(device) for k, v in batch.items()}
             outputs = model(**batch)
             all_preds.extend(torch.argmax(outputs.logits, dim=1).cpu().numpy())
             all_labels.extend(batch['labels'].cpu().numpy())
+
+            if i >= max_batches - 1:
+                break
 
     accuracy = accuracy_score(all_labels, all_preds)
 
     logger.info(f"Accuracy: {accuracy}")
 
     json.dump({"accuracy": accuracy}, open(metrics_path, "w"))
-
 
 
 if __name__ == "__main__":
