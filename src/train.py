@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import torch
 import transformers
 from logs import get_logger
@@ -47,11 +48,14 @@ def train():
     logger.info("Training model...")
     training_args = transformers.TrainingArguments(**trainer_args)
 
+    train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 1000))  # Use first 1000 samples
+    eval_subset = torch.utils.data.Subset(preprocessed_dataset["test"], indices=range(0, 200))  # Use first 200 samples for evaluation
+
     trainer = transformers.Trainer(
         model=model,
         args=training_args,
-        train_dataset=preprocessed_dataset["train"],
-        eval_dataset=preprocessed_dataset["test"],
+        train_dataset=train_subset,  # preprocessed_dataset["train"],
+        eval_dataset=eval_subset,  # preprocessed_dataset["test"],
         tokenizer=tokenizer,
         compute_metrics=compute_metrics
     )
