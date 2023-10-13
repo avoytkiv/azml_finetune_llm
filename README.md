@@ -49,6 +49,25 @@ $ dvc pull
 $ dvc push
 ```
 
+Usually current remote URL for origin is using HTTPS. If you want to use SSH keys for authentication, you should change this URL to the SSH format. You can do this with:
+
+```shell
+git remote set-url origin git@github.com:avoytkiv/azml_finetune_llm.git
+```
+
+Also, check permissions for the SSH key and change them if needed. This error may occur if the permissions are not correct:
+
+>[!ERROR]
+>The remote server unexpectedly closed the connection.owner or permissions on /home/ubuntu/.ssh/config
+
+This can be fixed by changing the permissions of the config file:
+
+```shell
+chmod 600 ~/.ssh/config
+```
+
+More details can be found [here](https://serverfault.com/questions/253313/ssh-returns-bad-owner-or-permissions-on-ssh-config).
+
 
 ## SkyPilot: Run everything in Cloud
 
