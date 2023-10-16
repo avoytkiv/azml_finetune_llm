@@ -3,11 +3,11 @@ import numpy as np
 import torch
 import transformers
 from logs import get_logger
-from preprocess import preprocess, get_model_tokenizer, fix_random_seeds
+from preprocess import preprocess, get_model_tokenizer
 import dvc.api
 from dvclive.huggingface import DVCLiveCallback
 from logs import get_logger
-from utils import CheckpointCallback, cleanup_incomplete_checkpoints
+from utils import CheckpointCallback, cleanup_incomplete_checkpoints, safe_save_model_for_hf_trainer, fix_random_seeds
 from sklearn.metrics import accuracy_score
 
 
@@ -31,6 +31,8 @@ def train():
         trainer_args['fp16'] = True
     else:
         trainer_args['fp16'] = False
+    os.environ["WANDB_PROJECT"] = "skypilot-test"
+    os.environ["WANDB_LOG_MODEL"] = "checkpoint"
 
     logger = get_logger("TRAIN", log_level=log_level)
 
@@ -67,7 +69,11 @@ def train():
         trainer.train()
     else:
         logger.info("Resuming training from checkpoint")
+        trainer.add_callback(CheckpointCallback)
         trainer.train(resume_from_checkpoint=True)
+        trainer.save_state()
+        safe_save_model_for_hf_trainer(trainer=trainer,
+                                   output_dir=training_args.output_dir)
 
     logger.info("Saving model")
     trainer.model.save_pretrained(finetuned_model_out_path)
