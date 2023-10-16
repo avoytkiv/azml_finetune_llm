@@ -5,19 +5,10 @@ import transformers
 from pathlib import Path
 import sys
 from logs import get_logger
-import random
-import torch
-import numpy as np
 
 
 src_path = Path(__file__).parent.parent.resolve()
 sys.path.append(str(src_path))
-
-
-def fix_random_seeds(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
 
 
 def read_data(path) -> pd.DataFrame:
