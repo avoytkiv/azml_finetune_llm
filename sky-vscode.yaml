@@ -14,23 +14,15 @@ resources:
 workdir: . 
 file_mounts:
   /data: 
-    name: s3://hotel-reviews-skypilot
-    source: ~/datasets
-    store: s3
-    persistent: True
-    mode: MOUNT
+    source: s3://hotel-reviews-skypilot
+    mode: MOUNT  
   /checkpoints:
-    name: hotel-reviews-skypilot
-    source: ~/checkpoints
-    store: s3
-    mode: COPY
-    persistent: True
+    source: s3://hotel-reviews-skypilot
+    mode: MOUNT 
   /models:
-    name: hotel-reviews-skypilot
-    source: ~/models
-    store: s3
-    mode: COPY
-    persistent: True
+    source: s3://hotel-reviews-skypilot
+    mode: MOUNT 
+
   ~/.ssh/id_ed25519: ~/.ssh/id_ed25519
   ~/.ssh/id_ed25519.pub: ~/.ssh/id_ed25519.pub
   ~/.gitconfig: ~/.gitconfig
@@ -40,7 +32,4 @@ setup: |
 run: |
   cd ~/sky_workdir
   source activate pytorch
-  dvc pull 
   dvc exp run --pull --allow-missing
-  chmod 600 ~/.ssh/config
-  dvc exp push origin

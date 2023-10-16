@@ -1,0 +1,20 @@
+name: sky-test
+resources:
+  accelerators: T4:1
+  cloud: aws
+  region: us-west-1
+  instance_type: g4dn.xlarge
+  cpus: 4
+workdir: ~/azml_finetune_llm
+file_mounts:
+  /data: /data
+  /checkpoints:
+    source: s3://hotel-reviews-skypilot
+    mode: MOUNT 
+  /models:
+    source: s3://hotel-reviews-skypilot
+    mode: MOUNT 
+
+run: |
+  pwd
+  ls -la /
