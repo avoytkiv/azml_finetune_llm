@@ -5,7 +5,6 @@ import transformers
 from logs import get_logger
 from preprocess import preprocess, get_model_tokenizer
 import dvc.api
-from dvclive.huggingface import DVCLiveCallback
 from logs import get_logger
 from utils import CheckpointCallback, cleanup_incomplete_checkpoints, safe_save_model_for_hf_trainer, fix_random_seeds
 from sklearn.metrics import accuracy_score
@@ -63,7 +62,6 @@ def train():
 
     cleanup_incomplete_checkpoints(training_args.output_dir)
     trainer.add_callback(CheckpointCallback())
-    trainer.add_callback(DVCLiveCallback(log_model="all"))
 
     if not os.listdir(training_args.output_dir):
         trainer.train()
@@ -71,12 +69,10 @@ def train():
         logger.info("Resuming training from checkpoint")
         trainer.add_callback(CheckpointCallback)
         trainer.train(resume_from_checkpoint=True)
-        trainer.save_state()
-        safe_save_model_for_hf_trainer(trainer=trainer,
-                                   output_dir=training_args.output_dir)
-
+    
     logger.info("Saving model")
-    trainer.model.save_pretrained(finetuned_model_out_path)
+    trainer.save_state()
+    safe_save_model_for_hf_trainer(trainer=trainer, output_dir=finetuned_model_out_path)
 
 
 if __name__ == "__main__":
