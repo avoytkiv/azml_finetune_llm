@@ -4,9 +4,6 @@ base:
 
 data:
   data_path: data/hotel_reviews.csv
-  data_train_path: data/train.csv
-  data_val_path: data/val.csv
-  data_test_path: data/test.csv
   num_labels: 5
 
 preprocess:
@@ -15,9 +12,9 @@ preprocess:
   max_length: 128
 
 train:
-  finetuned_model_out_path: models/finetuned_model
+  finetuned_model_out_path: models
   trainer_args:
-    output_dir: dvclive/artifacts
+    output_dir: checkpoints
     overwrite_output_dir: False
     do_train: True
     do_eval: True
@@ -54,7 +51,7 @@ train:
     fp16_opt_level: "O1"
     group_by_length: True
     length_column_name: "length"
-    report_to: "none"
+    report_to: "wandb"
     ddp_find_unused_parameters: False
     dataloader_pin_memory: True
     skip_memory_metrics: True
