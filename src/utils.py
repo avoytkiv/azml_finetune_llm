@@ -29,7 +29,6 @@ class CheckpointCallback(transformers.TrainerCallback):
 
 def cleanup_incomplete_checkpoints(output_dir):
     """Remove incomplete checkpoints.
-    
     Check the existence of checkpoints in all processes.
     All ranks must simultaneously resume from a checkpoint if it exists.
     Otherwise, upon recovery the model weights may not reload correctly,
