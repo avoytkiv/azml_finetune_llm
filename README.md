@@ -8,11 +8,20 @@
 - [x] Evaluate the `bert-base-uncased` model on the preprocessed dataset.
 - [x] Fine-tune the `bert-base-uncased` model.
 - [x] Set up infrastructure to run the training pipeline in the cloud on a GPU instance.
-    - [x] Install SkyPilot and DVC.
-    - [x] Authenticate with AWS, GCP, and Azure. Skypilot will choose the cloud provider based on GPU availability and pricing.
+    - [x] Register a new account on: 
+        - Lambda (AI cloud platform), 
+        - Cloudflare (R2 storage with zero egress charges), 
+        - AWS, Azure, GCP (major GPU cloud providers) 
+    - [x] Request quota increase for GPU instances.
+    - [x] Install SkyPilot, DVC, and Weight & Biases.
+    - [x] Authenticate with AWS, Azure, GCP etc. Skypilot will choose the cloud provider based on GPU availability and pricing.
     - [x] Upload the data to S3 (tracked by DVC).
     - [x] Create a SkyPilot configuration to run the training job in the cloud.
+        - [x] Configure resources (cloud provider, instance type, etc.).
+        - [x] Configure file mounts (artifacts, data, etc.)
+        - [x] Configure the training job (command, environment variables, etc.).
     - [x] Create SSH keys to connect to GitHub (DVC needs it to push the results of the experiment to the remote storage).
+    - [x] Checkpointing to cloud storage 
 
 
 ## Setup
@@ -101,7 +110,9 @@ sky launch -c train --use-spot -i 30 --down sky-training.yaml
 
 This SkyPilot command uses spot instances to save costs and automatically terminates the instance after 30 minutes of idleness. Once the experiment is complete, its artifacts such as model weights and metrics are stored in your bucket (thanks to the dvc exp push origin command in sky-training.yaml).
 
-Add `--env DVC-STUDIO-TOKEN` to `sky launch/exec` command to see the experiment running live in DVC Studio. First, make it available in your current shell.
+Add `--env DVC-STUDIO-TOKEN` to `sky launch/exec` command to see the experiment running live in DVC Studio.
+Add `--env WANDB_API_KEY` to `sky launch/exec` command to see the experiment running live in Weights & Biases.
+First, make it available in your current shell.
 
 While the model is training you can monitor the logs by running the following command.
 
@@ -116,6 +127,22 @@ dvc exp pull origin
 ```
 
 You can change the cloud provider and instance type in the resources section of sky-training.yaml or sky-vscode.yaml.
+
+In the YAML’s file_mounts section, we specified that a bucket named $ARTIFACT_BUCKET_NAME (passed in via an env var) should be mounted at /artifacts inside the VM:
+
+```shell
+file_mounts:
+  /artifacts:
+    name: $ARTIFACT_BUCKET_NAME
+    mode: MOUNT
+```
+When launching the job, we then simply pass `/artifacts` to its `--output_dir` flag, to which it will write all checkpoints and other artifacts
+
+In other words, your training program uses this mounted path as if it’s local to the VM! Files/dirs written to the mounted directory are automatically synced to the cloud bucket.
+
+>[!NOTE]  
+>There’s one edge case to handle, however: During a checkpoint write, the instance may get preempted suddenly and only partial
+>state is written to the cloud bucket. When this happens, resuming from a corrupted partial checkpoint will crash the program.
 
 ## Data Science Workflow
 
@@ -134,9 +161,13 @@ mv requirements-froze.txt requirements.txt
 
 ## Useful Resources
 - [SkyPilot Documentation](https://skypilot-dev.readthedocs.io/en/latest/)
+- [SkyPilot - Configure access to cloud providers](https://skypilot.readthedocs.io/en/latest/getting-started/installation.html)
+- [Request quota increase](https://skypilot.readthedocs.io/en/latest/cloud-setup/quota.html#quota)
+- [Azure - GPU optimized virtual machine sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-gpu)
 - [DVC Documentation](https://dvc.org/doc)
 - [ML experiments in the cloud with SkyPilot and DVC](https://alex000kim.com/tech/2023-08-10-ml-experiments-in-cloud-skypilot-dvc/)
 - [Fine-Tuning Large Language Models with a Production-Grade Pipeline](https://iterative.ai/blog/finetune-llm-pipeline-dvc-skypilot)
 - [Skypilot LLM](https://github.com/skypilot-org/skypilot/tree/master/llm)
 - [Create SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+- [WANDB - Logging with Weights and Biases in Transformer](https://docs.wandb.ai/guides/integrations/huggingface)
 
