@@ -5,6 +5,7 @@ import transformers
 from pathlib import Path
 import sys
 from logs import get_logger
+from utils import fix_random_seeds
 
 
 src_path = Path(__file__).parent.parent.resolve()
