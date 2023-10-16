@@ -7,11 +7,11 @@
     - [x] Tokenize the dataset.
 - [x] Evaluate the `bert-base-uncased` model on the preprocessed dataset.
 - [x] Fine-tune the `bert-base-uncased` model.
-- [x] Set up SkyPilot and DVC.
+- [x] Set up infrastructure to run the training pipeline in the cloud on a GPU instance.
     - [x] Install SkyPilot and DVC.
-    - [x] Configure AWS cloud.
+    - [x] Authenticate with AWS, GCP, and Azure. Skypilot will choose the cloud provider based on GPU availability and pricing.
     - [x] Upload the data to S3 (tracked by DVC).
-    - [x] Create a SkyPilot configuration to run the training pipeline in the cloud.
+    - [x] Create a SkyPilot configuration to run the training job in the cloud.
     - [x] Create SSH keys to connect to GitHub (DVC needs it to push the results of the experiment to the remote storage).
 
 
@@ -101,7 +101,7 @@ sky launch -c train --use-spot -i 30 --down sky-training.yaml
 
 This SkyPilot command uses spot instances to save costs and automatically terminates the instance after 30 minutes of idleness. Once the experiment is complete, its artifacts such as model weights and metrics are stored in your bucket (thanks to the dvc exp push origin command in sky-training.yaml).
 
-Add `--env DVC-STUDIO-TOKEN` to see the experiment running live in DVC Studio.
+Add `--env DVC-STUDIO-TOKEN` to `sky launch/exec` command to see the experiment running live in DVC Studio. First, make it available in your current shell.
 
 While the model is training you can monitor the logs by running the following command.
 
