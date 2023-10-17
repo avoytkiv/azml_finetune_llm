@@ -162,6 +162,7 @@ mv requirements-froze.txt requirements.txt
 ## Useful Resources
 - [SkyPilot Documentation](https://skypilot-dev.readthedocs.io/en/latest/)
 - [SkyPilot - Configure access to cloud providers](https://skypilot.readthedocs.io/en/latest/getting-started/installation.html)
+- [SkyPilot - Source code for sky.Task - debugging](https://sky-proj-sky.readthedocs-hosted.com/en/latest/_modules/sky/task.html)
 - [Request quota increase](https://skypilot.readthedocs.io/en/latest/cloud-setup/quota.html#quota)
 - [Azure - GPU optimized virtual machine sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-gpu)
 - [DVC Documentation](https://dvc.org/doc)
