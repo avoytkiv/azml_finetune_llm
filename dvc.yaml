@@ -26,4 +26,5 @@ stages:
     params:
       - train
     outs:
-      - models/finetuned_model
+      - models:
+          cache: false
