@@ -1,8 +1,3 @@
-envs:
-  HF_TOKEN: <your-huggingface-token> # Change to your own huggingface token
-  ARTIFACT_BUCKET_NAME: YOUR_OWN_BUCKET_NAME # Change to your own bucket name
-  WANDB_API_KEY: ""
-
 name: sky-vscode
 resources:
   accelerators: T4:1
@@ -11,18 +6,15 @@ resources:
   instance_type: g4dn.2xlarge
   cpus: 8
   image_id: ami-0d85eb7b91911c834 
-workdir: . 
+workdir: ~/azml_finetune_llm 
 file_mounts:
-  /data: 
-    source: s3://hotel-reviews-skypilot
-    mode: MOUNT  
-  /checkpoints:
+  /data: ~/azml_finetune_llm/data
+  ~/sky_workdir/checkpoints: 
     source: s3://hotel-reviews-skypilot
     mode: MOUNT 
-  /models:
+  ~/sky_workdir/models:
     source: s3://hotel-reviews-skypilot
     mode: MOUNT 
-
   ~/.ssh/id_ed25519: ~/.ssh/id_ed25519
   ~/.ssh/id_ed25519.pub: ~/.ssh/id_ed25519.pub
   ~/.gitconfig: ~/.gitconfig
@@ -32,4 +24,4 @@ setup: |
 run: |
   cd ~/sky_workdir
   source activate pytorch
-  dvc exp run --pull --allow-missing
+  dvc exp run 
