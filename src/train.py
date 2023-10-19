@@ -8,7 +8,7 @@ from preprocess import preprocess, get_model_tokenizer
 import dvc.api
 from logs import get_logger
 from utils import CheckpointCallback, cleanup_incomplete_checkpoints, safe_save_model_for_hf_trainer, fix_random_seeds
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 import wandb
 
 
@@ -122,10 +122,6 @@ def train():
 
     train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 200))  
     # eval_subset = torch.utils.data.Subset(preprocessed_dataset["test"], indices=range(0, 200))  
-
-    early_stopping_callback = transformers.EarlyStoppingCallback(
-        early_stopping_patience=early_stopping_patience, 
-        early_stopping_threshold=early_stopping_threshold)
     
     trainer = transformers.Trainer(
         model=model,
@@ -134,7 +130,9 @@ def train():
         eval_dataset=preprocessed_dataset["test"],
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
-        callbacks=[early_stopping_callback, WAndBEarlyStoppingLoggingCallback()],
+        callbacks=[transformers.EarlyStoppingCallback(
+            early_stopping_patience=early_stopping_patience,
+            early_stopping_threshold=early_stopping_threshold)],
     )
 
     cleanup_incomplete_checkpoints(training_args.output_dir)
