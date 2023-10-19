@@ -10,17 +10,7 @@ from logs import get_logger
 from utils import CheckpointCallback, cleanup_incomplete_checkpoints, safe_save_model_for_hf_trainer, fix_random_seeds
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 import wandb
-
-
-class WAndBEarlyStoppingLoggingCallback(transformers.TrainerCallback):
-    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
-        # Check if training has been stopped early, which can be inferred if the 
-        # current global step is less than the maximum number of steps.
-        if state.max_steps is not None and state.global_step < state.max_steps:
-            # Log a custom message indicating that early stopping occurred.
-            # Since `best_metric` isn't directly available, you might want to log the last metric.
-            last_metric_value = metrics[args.metric_for_best_model] if metrics and args.metric_for_best_model in metrics else None
-            wandb.log({"early_stopping": True, "last_metric_value": last_metric_value})
+from sky_callback import SkyTransformersCallback
 
 
 class ConfusionMatrixCallback(transformers.TrainerCallback):
@@ -54,7 +44,6 @@ class ConfusionMatrixCallback(transformers.TrainerCallback):
                     y_true=label_ids,
                     preds=pred_labels,
                     class_names=class_names)})
-
 
 
 def compute_metrics(p):
@@ -125,20 +114,20 @@ def train():
     logger.info("Training model...")
     training_args = transformers.TrainingArguments(**trainer_args)
 
-    train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 200))  
-    # eval_subset = torch.utils.data.Subset(preprocessed_dataset["test"], indices=range(0, 200))  
+    train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 1000))  
+    eval_subset = torch.utils.data.Subset(preprocessed_dataset["test"], indices=range(0, 200))  
     
     trainer = transformers.Trainer(
         model=model,
         args=training_args,
-        train_dataset=train_subset, # preprocessed_dataset["train"],
-        eval_dataset=preprocessed_dataset["test"],
+        train_dataset=train_subset,  # preprocessed_dataset["train"],
+        eval_dataset=eval_subset,  # preprocessed_dataset["test"],
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
-        callbacks=[transformers.EarlyStoppingCallback(
-            early_stopping_patience=early_stopping_patience,
-            early_stopping_threshold=early_stopping_threshold)],
-    )
+        callbacks=[SkyTransformersCallback(),
+                   transformers.EarlyStoppingCallback(
+                       early_stopping_patience=early_stopping_patience,
+                       early_stopping_threshold=early_stopping_threshold)])
 
     cleanup_incomplete_checkpoints(training_args.output_dir)
     trainer.add_callback(CheckpointCallback())
