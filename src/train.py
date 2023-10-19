@@ -8,6 +8,7 @@ import dvc.api
 from logs import get_logger
 from utils import CheckpointCallback, cleanup_incomplete_checkpoints, safe_save_model_for_hf_trainer, fix_random_seeds
 from sklearn.metrics import accuracy_score
+import wandb
 
 
 def compute_metrics(p):
@@ -25,20 +26,41 @@ def train():
     num_labels = config["data"]["num_labels"]
     trainer_args = config["train"]["trainer_args"]
     finetuned_model_out_path = config["train"]["finetuned_model_out_path"]
-
-    if torch.cuda.is_available():
-        trainer_args['fp16'] = True
-    else:
-        trainer_args['fp16'] = False
-    os.environ["WANDB_PROJECT"] = "skypilot-test"
+    trainer_args['run_name'] = os.environ.get("SKYPILOT_TASK_ID")
+    run_name = trainer_args['run_name']
+    project_name = config["train"]["project_name"]
+    os.environ["WANDB_PROJECT"] = project_name
     os.environ["WANDB_LOG_MODEL"] = "checkpoint"
+    trainer_args['fp16'] = True if torch.cuda.is_available() else False
 
     logger = get_logger("TRAIN", log_level=log_level)
 
     fix_random_seeds(random_state)
 
-    logger.info(f"Loading model {model_name}...")
-    tokenizer, model = get_model_tokenizer(model_name, num_labels)
+    logger.info("Initializing wandb run...")
+    run = wandb.init(
+        project=project_name,
+        name=run_name,  # Skypilot task id is used to identify the same job
+        resume="allow",  # "allow" will resume the run if it exists, otherwise it will start a new run
+    )
+
+    logger.info("Checking for previous checkpoints...")
+    last_checkpoint = wandb.run.summary.get("last_checkpoint", None)
+    checkpoint_dir = None
+
+    if last_checkpoint:
+        logger.info(f"Found checkpoint {last_checkpoint}, downloading...")
+        artifact = run.use_artifact(last_checkpoint)
+        checkpoint_dir = artifact.download()
+
+    # Load the model, possibly from a checkpoint
+    if checkpoint_dir:
+        logger.info(f"Resuming training from checkpoint in {checkpoint_dir}...")
+        tokenizer, model = get_model_tokenizer(checkpoint_dir, num_labels)
+    else:
+        logger.info(f"Loading model {model_name} from scratch...")
+        tokenizer, model = get_model_tokenizer(model_name, num_labels)
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
 
@@ -63,12 +85,11 @@ def train():
     cleanup_incomplete_checkpoints(training_args.output_dir)
     trainer.add_callback(CheckpointCallback())
 
-    if not os.listdir(training_args.output_dir):
-        trainer.train()
-    else:
-        logger.info("Resuming training from checkpoint")
-        trainer.add_callback(CheckpointCallback)
-        trainer.train(resume_from_checkpoint=True)
+    trainer.train(resume_from_checkpoint=checkpoint_dir if checkpoint_dir else None)
+
+    # Update the last checkpoint in wandb
+    last_checkpoint = os.path.join(training_args.output_dir, "checkpoint-{}".format(training_args.logging_steps))
+    run.summary["last_checkpoint"] = last_checkpoint
     
     logger.info("Saving model")
     trainer.save_state()
