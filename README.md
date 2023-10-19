@@ -1,5 +1,20 @@
 # Fine-Tuning LLM with SkyPilot and DVC
 
+In this project, I fine-tune the `bert-base-uncased` model for text classification on the `hotels-reviews` dataset.  
+
+There are a few learning goals for this project:  
+
+- **Provisioning/Infrastructure**: Run the training pipeline in the cloud on a GPU instance in the most efficient way across multiple cloud providers (cost, performance, checkpointing, spot instances, etc.).
+- **Machine Learning**: How fine-tuning improves the performance of the model.
+- **MLOps**: Compare ML experiments on Weights & Biases vs DVC Studio - best tool, advanteages and disadvantages.
+
+Tools used in this project:
+
+- HuggingFace Transformers for fine-tuning the model.
+- DVC for defining machine learning pipelines - dependencies.
+- SkyPilot for provisioning infrastructure and running the training pipeline in the cloud.
+- Weights & Biases for logging metrics and artifacts.
+
 **Tasks**
 - [x] Preprocess the custom `hotels-reviews` dataset.
     - [x] Convert the dataset to the HuggingFace format.
@@ -169,6 +184,7 @@ mv requirements-froze.txt requirements.txt
 - [SkyPilot Documentation](https://skypilot-dev.readthedocs.io/en/latest/)
 - [SkyPilot - Configure access to cloud providers](https://skypilot.readthedocs.io/en/latest/getting-started/installation.html)
 - [SkyPilot - Source code for sky.Task - debugging](https://sky-proj-sky.readthedocs-hosted.com/en/latest/_modules/sky/task.html)
+- [SkyPilot - SkyCallback](https://skypilot.readthedocs.io/en/latest/reference/benchmark/callback.html#integrations-with-ml-frameworks)
 - [Request quota increase](https://skypilot.readthedocs.io/en/latest/cloud-setup/quota.html#quota)
 - [Azure - GPU optimized virtual machine sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-gpu)
 - [DVC Documentation](https://dvc.org/doc)
