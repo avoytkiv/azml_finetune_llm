@@ -57,6 +57,8 @@ train:
     ddp_find_unused_parameters: False
     dataloader_pin_memory: True
     skip_memory_metrics: True
+    early_stopping_patience: 3
+    early_stopping_threshold: 0.01
 
 
 evaluate:
