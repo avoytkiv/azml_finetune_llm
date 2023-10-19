@@ -12,9 +12,11 @@ preprocess:
   max_length: 128
 
 train:
+  project_name: "skypilot-test"
   finetuned_model_out_path: models
   trainer_args:
     output_dir: checkpoints
+    run_name: None
     overwrite_output_dir: False
     do_train: True
     do_eval: True
