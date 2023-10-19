@@ -20,8 +20,14 @@
         - [x] Configure resources (cloud provider, instance type, etc.).
         - [x] Configure file mounts (artifacts, data, etc.)
         - [x] Configure the training job (command, environment variables, etc.).
-    - [x] Create SSH keys to connect to GitHub (DVC needs it to push the results of the experiment to the remote storage).
-    - [x] Checkpointing to cloud storage 
+    - [x] Create SSH keys to connect to GitHub (DVC needs it as it works with Git).
+    - [x] Implement checkpoints to save the model weights and metrics to WandB. It will allow to resume training from the last checkpoint. With this setup we can run the training job for a long time on spot instances (`sky spot launch`) and get automatic recovery from preemption.
+    - [x] Implement `Early Stopping` to not waste time on training the model that is not improving.
+
+    Bonus tasks:
+    - [ ] Benchmark performance and cost of different GPU instances on different cloud providers (`sky bench launch`).
+        - [ ] Make a table with the results.
+    - [ ] Check Sky Spot Instances Dashboard
 
 
 ## Setup
