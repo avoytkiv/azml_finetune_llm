@@ -11,6 +11,14 @@ from sklearn.metrics import accuracy_score
 import wandb
 
 
+class WAndBEarlyStoppingLoggingCallback(transformers.TrainerCallback):
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        # Check if early stopping has been triggered
+        if state.is_early_stopping:
+            # Log a custom message or metric indicating that early stopping occurred
+            wandb.log({"early_stopping": True, "best_metric": state.best_metric})
+
+
 def compute_metrics(p):
     preds = np.argmax(p.predictions, axis=1)
     return {"accuracy": accuracy_score(p.label_ids, preds)}
@@ -36,6 +44,8 @@ def train():
     logger = get_logger("TRAIN", log_level=log_level)
 
     fix_random_seeds(random_state)
+
+    logger.info(f"Running with SKYPILOT_TASK_ID: {run_name}")
 
     logger.info("Initializing wandb run...")
     run = wandb.init(
@@ -70,16 +80,17 @@ def train():
     logger.info("Training model...")
     training_args = transformers.TrainingArguments(**trainer_args)
 
-    # train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 1000))  # Use first 1000 samples
+    train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 100))  # Use first 1000 samples
     # eval_subset = torch.utils.data.Subset(preprocessed_dataset["test"], indices=range(0, 200))  # Use first 200 samples for evaluation
 
     trainer = transformers.Trainer(
         model=model,
         args=training_args,
-        train_dataset=preprocessed_dataset["train"],
+        train_dataset=train_subset, # preprocessed_dataset["train"],
         eval_dataset=preprocessed_dataset["test"],
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics
+        compute_metrics=compute_metrics,
+        callbacks=[WAndBEarlyStoppingLoggingCallback()],
     )
 
     cleanup_incomplete_checkpoints(training_args.output_dir)
@@ -92,8 +103,9 @@ def train():
     run.summary["last_checkpoint"] = last_checkpoint
     
     logger.info("Saving model")
-    trainer.save_state()
-    safe_save_model_for_hf_trainer(trainer=trainer, output_dir=finetuned_model_out_path)
+    logger.info("Don't save on virtual machine as far as model is daved to wandb")
+    # trainer.save_state()
+    # safe_save_model_for_hf_trainer(trainer=trainer, output_dir=finetuned_model_out_path)
 
 
 if __name__ == "__main__":
