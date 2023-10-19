@@ -9,12 +9,6 @@ resources:
 workdir: ~/azml_finetune_llm 
 file_mounts:
   /data: ~/azml_finetune_llm/data
-  ~/sky_workdir/checkpoints: 
-    source: s3://hotel-reviews-skypilot
-    mode: MOUNT 
-  ~/sky_workdir/models:
-    source: s3://hotel-reviews-skypilot
-    mode: MOUNT 
   ~/.ssh/id_ed25519: ~/.ssh/id_ed25519
   ~/.ssh/id_ed25519.pub: ~/.ssh/id_ed25519.pub
   ~/.gitconfig: ~/.gitconfig
