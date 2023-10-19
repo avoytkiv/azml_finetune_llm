@@ -14,8 +14,8 @@ preprocess:
 train:
   project_name: "skypilot-test"
   finetuned_model_out_path: models
-  early_stopping_patience: 3
-  early_stopping_threshold: 0.01
+  early_stopping_patience: 1
+  early_stopping_threshold: 0.1
   trainer_args:
     output_dir: checkpoints
     run_name: None
@@ -24,7 +24,7 @@ train:
     do_eval: True
     do_predict: False
     evaluation_strategy: "steps"
-    eval_steps: 1000
+    eval_steps: 10
     prediction_loss_only: False
     per_device_train_batch_size: 8
     per_device_eval_batch_size: 8
@@ -42,8 +42,9 @@ train:
     log_level_replica: "warning"
     logging_dir: "./logs"
     logging_strategy: "steps"
-    logging_steps: 1000
-    save_strategy: "epoch"
+    logging_steps: 50
+    save_strategy: "steps"
+    save_steps: 50
     save_total_limit: 2
     use_cpu: False
     seed: 42
