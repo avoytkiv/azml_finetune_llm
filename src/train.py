@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from sklearn.metrics import confusion_matrix
 import torch
 import transformers
 from logs import get_logger
@@ -13,10 +14,47 @@ import wandb
 
 class WAndBEarlyStoppingLoggingCallback(transformers.TrainerCallback):
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
-        # Check if early stopping has been triggered
-        if state.is_early_stopping:
-            # Log a custom message or metric indicating that early stopping occurred
-            wandb.log({"early_stopping": True, "best_metric": state.best_metric})
+        # Check if training has been stopped early, which can be inferred if the 
+        # current global step is less than the maximum number of steps.
+        if state.max_steps is not None and state.global_step < state.max_steps:
+            # Log a custom message indicating that early stopping occurred.
+            # Since `best_metric` isn't directly available, you might want to log the last metric.
+            last_metric_value = metrics[args.metric_for_best_model] if metrics and args.metric_for_best_model in metrics else None
+            wandb.log({"early_stopping": True, "last_metric_value": last_metric_value})
+
+
+class ConfusionMatrixCallback(transformers.TrainerCallback):
+    def __init__(self, trainer):
+        super().__init__()
+        self.trainer = trainer
+
+    def on_evaluate(self, args, state, control, **kwargs):
+        # Access the evaluation dataset. Assuming it's set as an attribute of the trainer.
+        evaluation_dataset = self.trainer.eval_dataset
+
+        # Continue only if the evaluation dataset is available
+        if evaluation_dataset is None:
+            print("Evaluation dataset not available, cannot compute confusion matrix.")
+            return
+
+        # Get predictions and labels
+        predictions, label_ids, _ = self.trainer.predict(evaluation_dataset)
+
+        # We have logits, so get the actual predictions as the highest-valued class
+        if isinstance(predictions, tuple):
+            predictions = predictions[0]
+        pred_labels = np.argmax(predictions, axis=1)
+
+        # Define your actual class names
+        class_names = ["class_1", "class_2", "class_3", ...]  # replace with your actual class names
+
+        # Log the confusion matrix as an image to W&B
+        wandb.log({"confusion_matrix": wandb.plot.confusion_matrix(
+                    probs=None,
+                    y_true=label_ids,
+                    preds=pred_labels,
+                    class_names=class_names)})
+
 
 
 def compute_metrics(p):
@@ -34,6 +72,8 @@ def train():
     num_labels = config["data"]["num_labels"]
     trainer_args = config["train"]["trainer_args"]
     finetuned_model_out_path = config["train"]["finetuned_model_out_path"]
+    early_stopping_patience = config["train"]["early_stopping_patience"]
+    early_stopping_threshold = config["train"]["early_stopping_threshold"]
     trainer_args['run_name'] = os.environ.get("SKYPILOT_TASK_ID")
     run_name = trainer_args['run_name']
     project_name = config["train"]["project_name"]
@@ -80,9 +120,13 @@ def train():
     logger.info("Training model...")
     training_args = transformers.TrainingArguments(**trainer_args)
 
-    train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 100))  # Use first 1000 samples
-    # eval_subset = torch.utils.data.Subset(preprocessed_dataset["test"], indices=range(0, 200))  # Use first 200 samples for evaluation
+    train_subset = torch.utils.data.Subset(preprocessed_dataset["train"], indices=range(0, 200))  
+    # eval_subset = torch.utils.data.Subset(preprocessed_dataset["test"], indices=range(0, 200))  
 
+    early_stopping_callback = transformers.EarlyStoppingCallback(
+        early_stopping_patience=early_stopping_patience, 
+        early_stopping_threshold=early_stopping_threshold)
+    
     trainer = transformers.Trainer(
         model=model,
         args=training_args,
@@ -90,11 +134,13 @@ def train():
         eval_dataset=preprocessed_dataset["test"],
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
-        callbacks=[WAndBEarlyStoppingLoggingCallback()],
+        callbacks=[early_stopping_callback, WAndBEarlyStoppingLoggingCallback()],
     )
 
     cleanup_incomplete_checkpoints(training_args.output_dir)
     trainer.add_callback(CheckpointCallback())
+    # confusion_matrix_callback = ConfusionMatrixCallback(trainer)
+    # trainer.add_callback(confusion_matrix_callback)
 
     trainer.train(resume_from_checkpoint=checkpoint_dir if checkpoint_dir else None)
 
