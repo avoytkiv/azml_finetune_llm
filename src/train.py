@@ -58,8 +58,13 @@ class ConfusionMatrixCallback(transformers.TrainerCallback):
 
 
 def compute_metrics(p):
-    preds = np.argmax(p.predictions, axis=1)
-    return {"accuracy": accuracy_score(p.label_ids, preds)}
+    pred, labels = p
+    pred = np.argmax(pred, axis=1)
+    accuracy = accuracy_score(y_true=labels, y_pred=pred)
+    recall = recall_score(y_true=labels, y_pred=pred, average='macro')
+    precision = precision_score(y_true=labels, y_pred=pred, average='macro')
+    f1 = f1_score(y_true=labels, y_pred=pred, average='macro')
+    return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
 
 
 def train():
