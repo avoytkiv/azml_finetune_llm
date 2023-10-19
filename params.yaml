@@ -14,6 +14,8 @@ preprocess:
 train:
   project_name: "skypilot-test"
   finetuned_model_out_path: models
+  early_stopping_patience: 3
+  early_stopping_threshold: 0.01
   trainer_args:
     output_dir: checkpoints
     run_name: None
@@ -57,8 +59,6 @@ train:
     ddp_find_unused_parameters: False
     dataloader_pin_memory: True
     skip_memory_metrics: True
-    early_stopping_patience: 3
-    early_stopping_threshold: 0.01
 
 
 evaluate:
