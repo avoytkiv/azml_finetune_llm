@@ -69,19 +69,6 @@ Confirm the setup with the following command:
 sky check
 ```
 
-After configuring the setup, download the data to your local machine, then upload it to your own bucket (where you have write access).
-
-```shell
-# Pull data from remote storage to local machine
-$ dvc pull
-# Configure your own bucket in .dvc/config:
-#   - AWS: https://iterative.ai/blog/aws-remotes-in-dvc
-#   - GCP: https://iterative.ai/blog/using-gcp-remotes-in-dvc
-#   - Azure: https://iterative.ai/blog/azure-remotes-in-dvc
-# Push the data to your own bucket
-$ dvc push
-```
-
 Usually current remote URL for origin is using HTTPS. If you want to use SSH keys for authentication, you should change this URL to the SSH format. You can do this with:
 
 ```shell
@@ -138,7 +125,7 @@ Add `--env DVC-STUDIO-TOKEN` to `sky launch/exec` command to see the experiment 
 Add `--env WANDB_API_KEY` to `sky launch/exec` command to see the experiment running live in Weights & Biases.
 First, make it available in your current shell.
 
-While the model is training you can monitor the logs by running the following command.
+While the model is training, you can monitor the logs by running the following command.
 
 ```shell
 sky logs train
@@ -168,13 +155,17 @@ In other words, your training program uses this mounted path as if it’s local 
 >There’s one edge case to handle, however: During a checkpoint write, the instance may get preempted suddenly and only partial
 >state is written to the cloud bucket. When this happens, resuming from a corrupted partial checkpoint will crash the program.
 
+
+<img width="494" alt="Screenshot 2023-10-21 at 15 24 35" src="https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/05e418ca-9b07-4b69-8e2a-4dfb8729d4ed">
+
+
 ## Data Science Workflow
 
 1. Fine-tune the `bert-base-uncased` model for text classification on the `hotels-reviews` dataset.
 2. Evaluate the model on the `hotels-reviews-small` dataset.
 3. Use DVC to track metrics, model, and parameters across the train and evaluate stages.
 
-## Usefull Commands
+## Useful Commands
 
 Freeze only the packages that are required to run the project.
 
@@ -182,6 +173,15 @@ Freeze only the packages that are required to run the project.
 pip freeze -q -r requirements.txt | sed '/freeze/,$ d' > requirements-froze.txt
 mv requirements-froze.txt requirements.txt
 ```
+
+## Results
+
+![wandb](https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/4ccb6449-09bc-4342-a2bf-43c4e70db523)  
+
+## What's next
+
+Deploy
+
 
 ## Useful Resources
 - [SkyPilot Documentation](https://skypilot-dev.readthedocs.io/en/latest/)
