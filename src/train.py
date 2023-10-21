@@ -36,7 +36,7 @@ class ConfusionMatrixCallback(transformers.TrainerCallback):
         pred_labels = np.argmax(predictions, axis=1)
 
         # Define your actual class names
-        class_names = ["class_1", "class_2", "class_3", ...]  # replace with your actual class names
+        class_names = [0, 1, 2, 3, 4]
 
         # Log the confusion matrix as an image to W&B
         wandb.log({"confusion_matrix": wandb.plot.confusion_matrix(
