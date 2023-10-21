@@ -142,7 +142,9 @@ HuggingFace Transformers supports checkpointing. And has an integration with Wei
 - set the environment variable `WANDB_LOG_MODEL=checkpoint`.
 - set `--run_name` to `$SKYPILOT_TASK_ID` so that the logs for all recoveries of the same job will be saved to the same run in Weights & Biases.
 
-Any Transformers Trainer you initialize from now on will upload models to your W&B project. 
+Any Transformers Trainer you initialize from now on will upload models to your W&B project. Model checkpoints will be logged and include the full model lineage.  
+
+<img width="50%" alt="Screenshot 2023-10-21 at 16 04 10" src="https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/f65cf0ad-a0e4-417f-b5bb-88d4c1c2cd52">
 
 
 Any time the instance is preempted (interrupted), the SkyPilot will automatically resume the training job from the last checkpoint.
