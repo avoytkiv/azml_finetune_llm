@@ -150,15 +150,29 @@ Any Transformers Trainer you initialize from now on will upload models to your W
 Any time the instance is preempted (interrupted), the SkyPilot will automatically resume the training job from the last checkpoint.
 
 >[!NOTE]  
->There’s one edge case to handle, however: During a checkpoint write, the instance may get preempted suddenly and only partial
->state is written to the cloud bucket. When this happens, resuming from a corrupted partial checkpoint will crash the program.
+>There’s one edge case to handle: during a checkpoint write, the instance may get preempted suddenly and only partial
+>state is written to the cloud bucket. When this happens, resuming from a corrupted partial checkpoint will crash the program. The `cleanup_incomplete_checkpoints` function will delete any partial checkpoints that are incomplete.
 
 
 ## Data Science Workflow
 
-1. Fine-tune the `bert-base-uncased` model for text classification on the `hotels-reviews` dataset.
-2. Evaluate the model on the `hotels-reviews-small` dataset.
-3. Use DVC to track metrics, model, and parameters across the train and evaluate stages.
+1. Evaluate the `bert-base-uncased` model on the `hotels-reviews-small` dataset for baseline performance (it's 20% accuracy).
+2. Fine-tune the `bert-base-uncased` model for text classification on the `hotels-reviews` dataset.
+3. Evaluate the model on the `hotels-reviews-small` dataset.
+4. Use WandB to track metrics, model, and parameters across the train and evaluate stages.
+
+
+## Results
+
+Now, when the ml pipeline is defined and the cloud infrastructure is optimized for cost, we can run and then compare our experiments. Not only `train` and `evaluate` stages, but also `system` metrics such as GPU utilization, memory usage, etc. are logged to Weights & Biases.
+
+![wandb](https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/4ccb6449-09bc-4342-a2bf-43c4e70db523) 
+
+
+## What's next
+
+Use the Weights & Biases Model Registry to register models to prepare them for staging or deployment in your production environment.
+
 
 ## Useful Commands
 
@@ -167,15 +181,7 @@ Freeze only the packages that are required to run the project.
 ```shell
 pip freeze -q -r requirements.txt | sed '/freeze/,$ d' > requirements-froze.txt
 mv requirements-froze.txt requirements.txt
-```
-
-## Results
-
-![wandb](https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/4ccb6449-09bc-4342-a2bf-43c4e70db523)  
-
-## What's next
-
-Use the Weights & Biases Model Registry to register models to prepare them for staging or deployment in your production environment.
+``` 
 
 
 ## Useful Resources
@@ -183,12 +189,12 @@ Use the Weights & Biases Model Registry to register models to prepare them for s
 - [SkyPilot - Configure access to cloud providers](https://skypilot.readthedocs.io/en/latest/getting-started/installation.html)
 - [SkyPilot - Source code for sky.Task - debugging](https://sky-proj-sky.readthedocs-hosted.com/en/latest/_modules/sky/task.html)
 - [SkyPilot - SkyCallback](https://skypilot.readthedocs.io/en/latest/reference/benchmark/callback.html#integrations-with-ml-frameworks)
-- [Request quota increase](https://skypilot.readthedocs.io/en/latest/cloud-setup/quota.html#quota)
+- [Skypilot - LLM](https://github.com/skypilot-org/skypilot/tree/master/llm)
+- [SkyPilot - Request quota increase](https://skypilot.readthedocs.io/en/latest/cloud-setup/quota.html#quota)
 - [Azure - GPU optimized virtual machine sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-gpu)
 - [DVC Documentation](https://dvc.org/doc)
 - [ML experiments in the cloud with SkyPilot and DVC](https://alex000kim.com/tech/2023-08-10-ml-experiments-in-cloud-skypilot-dvc/)
 - [Fine-Tuning Large Language Models with a Production-Grade Pipeline](https://iterative.ai/blog/finetune-llm-pipeline-dvc-skypilot)
-- [Skypilot LLM](https://github.com/skypilot-org/skypilot/tree/master/llm)
 - [Create SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 - [WANDB - Logging with Weights and Biases in Transformer](https://docs.wandb.ai/guides/integrations/huggingface)
 
