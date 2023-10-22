@@ -144,7 +144,7 @@ HuggingFace Transformers supports checkpointing. And has an integration with Wei
 
 Any Transformers Trainer you initialize from now on will upload models to your W&B project. Model checkpoints will be logged and include the full model lineage.  
 
-<img width="50%" alt="Screenshot 2023-10-21 at 16 04 10" src="https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/f65cf0ad-a0e4-417f-b5bb-88d4c1c2cd52">
+<img width="50%" alt="Screenshot 2023-10-21 at 16 04 10" src="https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/f65cf0ad-a0e4-417f-b5bb-88d4c1c2cd52"> <img width="50%" alt="Screenshot 2023-10-21 at 15 24 35" src="https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/05e418ca-9b07-4b69-8e2a-4dfb8729d4ed">
 
 
 Any time the instance is preempted (interrupted), the SkyPilot will automatically resume the training job from the last checkpoint.
@@ -152,9 +152,6 @@ Any time the instance is preempted (interrupted), the SkyPilot will automaticall
 >[!NOTE]  
 >There’s one edge case to handle, however: During a checkpoint write, the instance may get preempted suddenly and only partial
 >state is written to the cloud bucket. When this happens, resuming from a corrupted partial checkpoint will crash the program.
-
-
-<img width="494" alt="Screenshot 2023-10-21 at 15 24 35" src="https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/05e418ca-9b07-4b69-8e2a-4dfb8729d4ed">
 
 
 ## Data Science Workflow
