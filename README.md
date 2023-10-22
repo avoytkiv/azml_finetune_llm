@@ -168,10 +168,11 @@ Now, when the ml pipeline is defined and the cloud infrastructure is optimized f
 
 ![wandb](https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/4ccb6449-09bc-4342-a2bf-43c4e70db523) 
 
+The model is able to learn the task and achieve 100% accuracy with no more than 200 samples.
 
 ## What's next
 
-Use the Weights & Biases Model Registry to register models to prepare them for staging or deployment in your production environment.
+Use the Weights & Biases Model Registry to register models to prepare it for `staging` or `deployment` in production environment.
 
 
 ## Useful Commands
