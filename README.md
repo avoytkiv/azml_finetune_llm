@@ -1,4 +1,4 @@
-# Fine-Tuning LLM with SkyPilot and DVC   
+# Fine-Tuning LLM with SkyPilot, DVC and W&B   
 
 <img width="1057" alt="Screenshot 2023-10-19 at 15 51 20" src="https://github.com/avoytkiv/azml_finetune_llm/assets/74664634/752023ad-12a1-4a94-9f55-392a415c341e">   
 
